@@ -1,11 +1,113 @@
 {
-  "name": "portnumbergenerator",
-  "module": "index.ts",
+  "name": "@portnumbergenerator/core",
+  "version": "8.0.0",
+  "description": "Enterprise-grade port number generation system with storage, sharding, observability, and multiple API protocols",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./facade": {
+      "types": "./dist/application/facades/PortNumberFacade.facade.d.ts",
+      "import": "./dist/application/facades/PortNumberFacade.facade.js"
+    },
+    "./legacy": {
+      "types": "./dist/application/legacy/PortNumbers.class.d.ts",
+      "import": "./dist/application/legacy/PortNumbers.class.js"
+    },
+    "./utilities": {
+      "types": "./dist/legacy/port-numbers/utilities/index.d.ts",
+      "import": "./dist/legacy/port-numbers/utilities/index.js"
+    },
+    "./api": {
+      "types": "./dist/api/generators/index.d.ts",
+      "import": "./dist/api/generators/index.js"
+    },
+    "./domain": {
+      "types": "./dist/domain/index.d.ts",
+      "import": "./dist/domain/index.js"
+    },
+    "./infrastructure": {
+      "types": "./dist/infrastructure/index.d.ts",
+      "import": "./dist/infrastructure/index.js"
+    }
+  },
+  "scripts": {
+    "test": "tsx test-all.ts",
+    "test:watch": "tsx watch test-all.ts",
+    "typecheck": "tsc --noEmit --skipLibCheck",
+    "build": "tsc --skipLibCheck",
+    "build:clean": "rm -rf dist && npm run build",
+    "dev": "tsx watch index.ts",
+    "lint": "tsc --noEmit --skipLibCheck && echo 'Lint passed'",
+    "ci": "npm run typecheck && npm run test",
+    "prepack": "npm run build",
+    "prepare": "npm run build || true"
+  },
+  "keywords": [
+    "port-number",
+    "port-generator",
+    "architecture",
+    "design-patterns",
+    "enterprise",
+    "ddd",
+    "cqrs",
+    "event-sourcing",
+    "facade",
+    "factory",
+    "saga",
+    "typescript",
+    "storage",
+    "redis",
+    "postgresql",
+    "sharding",
+    "observability",
+    "logging",
+    "metrics",
+    "tracing",
+    "grpc",
+    "websocket",
+    "cli",
+    "docker",
+    "kubernetes"
+  ],
+  "author": "PortNumberGenerator Engineering Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/portnumbergenerator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/portnumbergenerator/issues"
+  },
+  "homepage": "https://github.com/yourusername/portnumbergenerator#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "HOW-IT-WORKS.md",
+    "LICENSE"
+  ],
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {},
+  "publishConfig": {
+    "access": "public"
   }
 }
