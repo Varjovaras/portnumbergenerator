@@ -1,62 +1,341 @@
 /**
- * gRPC Service Implementation for Port Number Generator
+ * @fileoverview Enterprise gRPC Service Interface for Port Number Generation
  *
- * This file provides a gRPC service interface for port number operations.
- * In production, use @grpc/grpc-js and generate types from .proto files.
+ * This file contains the gRPC service definitions and type interfaces for the
+ * Port Number Generator™ enterprise application. Because sometimes REST isn't
+ * fast enough, GraphQL is too chatty, WebSockets are too stateful, and you need
+ * to generate port numbers using Google's battle-tested RPC framework with
+ * HTTP/2, protocol buffers, and bidirectional streaming.
+ *
+ * @module api/grpc
+ * @category API Layer
+ * @subcategory gRPC Service
+ * @since Phase 8 - Production Features
+ * @version 8.0.0-GRPC-ULTIMATE-EDITION
+ *
+ * @remarks
+ * This module provides a comprehensive gRPC service interface for port number
+ * operations with support for:
+ *
+ * - **Unary RPC**: Request/response port generation
+ * - **Server Streaming**: Real-time port allocation streams
+ * - **Client Streaming**: Batch port reservation uploads
+ * - **Bidirectional Streaming**: Interactive port negotiation
+ * - **Metadata Propagation**: Context and tracing headers
+ * - **Error Handling**: Rich gRPC status codes and details
+ *
+ * **Architectural Highlights:**
+ *
+ * - **Protocol Buffers**: Strongly-typed, efficient serialization
+ * - **HTTP/2**: Multiplexed connections, header compression
+ * - **Streaming**: Support for long-lived connections and push notifications
+ * - **Interceptors**: Request/response middleware pipeline
+ * - **Load Balancing**: Client-side load balancing with service discovery
+ * - **Deadlines**: Request timeouts and cancellation
+ *
+ * **Service Methods:**
+ *
+ * - `GeneratePort`: Generate a single port number
+ * - `GenerateBatchPorts`: Generate multiple port numbers
+ * - `CheckAvailability`: Check if port is available
+ * - `ReservePort`: Reserve a specific or random port
+ * - `ReleasePort`: Release a reserved port
+ * - `HealthCheck`: Service health verification
+ * - `StreamPorts`: Server-streaming port allocation
+ * - `SubscribeToPortEvents`: Real-time port event notifications
+ *
+ * **Design Philosophy:**
+ *
+ * gRPC provides superior performance compared to REST for high-frequency
+ * port number operations, with binary serialization reducing payload sizes
+ * by 70% and HTTP/2 multiplexing enabling thousands of concurrent requests
+ * over a single connection. Perfect for when generating two port numbers
+ * needs to be as fast and complicated as possible.
+ *
+ * @example
+ * ```typescript
+ * // Client usage
+ * const client = grpcClient;
+ * const response = await client.GeneratePort({
+ *   strategy: 'fibonacci',
+ *   min: 1024,
+ *   max: 65535
+ * });
+ * console.log(`Generated port: ${response.port}`);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Server streaming
+ * const stream = client.StreamPorts({ count: 10 });
+ * stream.on('data', (response) => {
+ *   console.log(`Received port: ${response.port}`);
+ * });
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Batch operations
+ * const batch = await client.GenerateBatchPorts({
+ *   count: 100,
+ *   strategy: 'prime',
+ *   min: 8000,
+ *   max: 9000
+ * });
+ * console.log(`Generated ${batch.ports.length} ports`);
+ * ```
+ *
+ * @see {@link GrpcPortRequest} for port generation request structure
+ * @see {@link GrpcPortResponse} for port generation response structure
+ * @see {@link grpcServer} for the server instance
+ * @see {@link grpcClient} for the client instance
+ *
+ * @author gRPC Architecture Team
+ * @copyright 2024 PortNumberGenerator™ Corporation
+ * @license MIT (but with gRPC performance)
+ *
+ * @standards
+ * - gRPC Core Specification
+ * - Protocol Buffers v3
+ * - HTTP/2 (RFC 7540)
+ * - OpenTelemetry for tracing
+ *
+ * @performance
+ * - Latency: <5ms for unary calls (p99)
+ * - Throughput: 50,000+ req/s per connection
+ * - Payload Size: 70% smaller than JSON REST
+ * - Connection Overhead: Single TCP connection for all RPCs
+ *
+ * @deployment
+ * - Supports TLS/SSL for secure communication
+ * - Compatible with Kubernetes service mesh
+ * - Load balancing with gRPC-LB protocol
+ * - Health checking via gRPC health protocol
  */
 
+/**
+ * Request message for generating a single port number.
+ *
+ * Contains all parameters needed to customize port generation strategy,
+ * constraints, and deterministic seeding.
+ *
+ * @interface GrpcPortRequest
+ * @category gRPC Messages
+ * @public
+ *
+ * @example
+ * ```typescript
+ * const request: GrpcPortRequest = {
+ *   strategy: 'fibonacci',
+ *   min: 1024,
+ *   max: 65535,
+ *   seed: 'deterministic-seed',
+ *   metadata: { service: 'api', version: '1.0' }
+ * };
+ * ```
+ *
+ * @since 8.0.0
+ */
 export interface GrpcPortRequest {
+  /** Generation strategy: 'random', 'sequential', 'fibonacci', 'prime' */
   strategy?: string;
+
+  /** Minimum port number (inclusive, default: 1024) */
   min?: number;
+
+  /** Maximum port number (inclusive, default: 65535) */
   max?: number;
+
+  /** Optional seed for deterministic generation */
   seed?: string;
+
+  /** Optional metadata for context and tracing */
   metadata?: Record<string, any>;
 }
 
+/**
+ * Response message containing a generated port number.
+ *
+ * Returns the generated port along with strategy used, timestamp,
+ * and optional metadata for tracing and debugging.
+ *
+ * @interface GrpcPortResponse
+ * @category gRPC Messages
+ * @public
+ *
+ * @example
+ * ```typescript
+ * const response: GrpcPortResponse = {
+ *   port: 8080,
+ *   strategy: 'fibonacci',
+ *   timestamp: 1704067200000,
+ *   metadata: { requestId: 'abc123' }
+ * };
+ * ```
+ *
+ * @since 8.0.0
+ */
 export interface GrpcPortResponse {
+  /** Generated port number (1-65535) */
   port: number;
+
+  /** Strategy used for generation */
   strategy: string;
+
+  /** Unix timestamp (ms) when port was generated */
   timestamp: number;
+
+  /** Optional metadata for tracing and context */
   metadata?: Record<string, any>;
 }
 
+/**
+ * Request message for generating multiple port numbers in batch.
+ *
+ * Efficiently generates multiple ports with shared parameters,
+ * reducing round-trip overhead compared to multiple unary calls.
+ *
+ * @interface GrpcBatchPortRequest
+ * @category gRPC Messages
+ * @public
+ *
+ * @example
+ * ```typescript
+ * const request: GrpcBatchPortRequest = {
+ *   count: 10,
+ *   strategy: 'prime',
+ *   min: 8000,
+ *   max: 9000
+ * };
+ * ```
+ *
+ * @since 8.0.0
+ */
 export interface GrpcBatchPortRequest {
+  /** Number of ports to generate (1-1000) */
   count: number;
+
+  /** Generation strategy (default: 'random') */
   strategy?: string;
+
+  /** Minimum port number (default: 1024) */
   min?: number;
+
+  /** Maximum port number (default: 65535) */
   max?: number;
+
+  /** Optional metadata */
   metadata?: Record<string, any>;
 }
 
+/**
+ * Response message containing multiple generated port numbers.
+ *
+ * Returns array of ports along with generation metadata.
+ *
+ * @interface GrpcBatchPortResponse
+ * @category gRPC Messages
+ * @public
+ *
+ * @since 8.0.0
+ */
 export interface GrpcBatchPortResponse {
+  /** Array of generated port numbers */
   ports: number[];
+
+  /** Strategy used for generation */
   strategy: string;
+
+  /** Unix timestamp (ms) when batch was generated */
   timestamp: number;
+
+  /** Number of ports generated */
   count: number;
 }
 
+/**
+ * Request message for checking port availability.
+ *
+ * @interface GrpcPortAvailabilityRequest
+ * @category gRPC Messages
+ * @public
+ *
+ * @since 8.0.0
+ */
 export interface GrpcPortAvailabilityRequest {
+  /** Port number to check (1-65535) */
   port: number;
 }
 
+/**
+ * Response message indicating port availability status.
+ *
+ * @interface GrpcPortAvailabilityResponse
+ * @category gRPC Messages
+ * @public
+ *
+ * @since 8.0.0
+ */
 export interface GrpcPortAvailabilityResponse {
+  /** Port number checked */
   port: number;
+
+  /** Whether port is available (not reserved) */
   available: boolean;
+
+  /** If reserved, who reserved it */
   reservedBy?: string;
+
+  /** If reserved, unix timestamp (ms) of reservation */
   reservedAt?: number;
 }
 
+/**
+ * Request message for reserving a port number.
+ *
+ * Can reserve a specific port or find and reserve any available
+ * port within a range.
+ *
+ * @interface GrpcReservePortRequest
+ * @category gRPC Messages
+ * @public
+ *
+ * @since 8.0.0
+ */
 export interface GrpcReservePortRequest {
+  /** Specific port to reserve (optional) */
   port?: number;
+
+  /** If port not specified, minimum range (default: 1024) */
   min?: number;
+
+  /** If port not specified, maximum range (default: 65535) */
   max?: number;
+
+  /** Optional reservation metadata */
   metadata?: Record<string, any>;
 }
 
+/**
+ * Response message for port reservation operation.
+ *
+ * @interface GrpcReservePortResponse
+ * @category gRPC Messages
+ * @public
+ *
+ * @since 8.0.0
+ */
 export interface GrpcReservePortResponse {
+  /** Whether reservation was successful */
   success: boolean;
+
+  /** Reserved port number (if successful) */
   port?: number;
+
+  /** Human-readable status message */
   message?: string;
+
+  /** Optional expiry timestamp for reservation */
   expiresAt?: number;
 }
 

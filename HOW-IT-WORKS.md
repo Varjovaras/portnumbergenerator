@@ -11,6 +11,7 @@
 - [How It All Works Together](#how-it-all-works-together)
 - [Advanced Features](#advanced-features)
 - [Usage Examples](#usage-examples)
+- [Importing as a Library](#importing-as-a-library)
 - [Development Journey](#development-journey)
 - [Technical Deep Dive](#technical-deep-dive)
 
@@ -701,6 +702,220 @@ console.log(diagnostics);
 // Get version
 console.log(generator.getVersion());  // "8.0.0"
 ```
+
+---
+
+## Importing as a Library
+
+When you install this package (`@portnumbergenerator/core`), you have **flexible import options** thanks to the modular export configuration.
+
+### 📦 Package Export Paths
+
+The package provides multiple entry points for tree-shaking optimization:
+
+```json
+{
+  ".": "./dist/index.js",              // Main entry - everything
+  "./facade": "./dist/application/facades/...",
+  "./legacy": "./dist/application/legacy/...",
+  "./utilities": "./dist/legacy/port-numbers/utilities/...",
+  "./api": "./dist/api/generators/...",
+  "./domain": "./dist/domain/...",
+  "./infrastructure": "./dist/infrastructure/..."
+}
+```
+
+### 🌲 Tree-Shaking: Import Only What You Need
+
+**Option 1: Import Everything (Not Recommended for Production)**
+
+```typescript
+// ❌ Imports the ENTIRE library (~2700+ lines)
+import { PortNumberGenerator } from '@portnumbergenerator/core';
+
+const generator = new PortNumberGenerator();
+const port = generator.frontendDevPortGetter; // 6969
+```
+
+This imports:
+- ✅ Main PortNumberGenerator class
+- ⚠️ Virtual Machine & Compiler
+- ⚠️ Event Store & Aggregates
+- ⚠️ Distributed Database
+- ⚠️ All 200+ utility methods
+- ⚠️ Factory hierarchy (5 levels)
+- ⚠️ Saga orchestration
+- **Result**: Large bundle size (~500KB+ compiled)
+
+**Option 2: Import Specific Modules (Recommended)**
+
+```typescript
+// ✅ Tree-shakeable - imports ONLY the legacy class
+import { PortNumbers } from '@portnumbergenerator/core/legacy';
+
+const frontend = PortNumbers.frontendPortNumber(); // 6969
+const backend = PortNumbers.backendPortNumber();   // 42069
+```
+
+This imports:
+- ✅ PortNumbers class only
+- ✅ Basic mathematical utilities
+- ❌ No VM, no event sourcing, no factories
+- **Result**: Smaller bundle (~50KB compiled)
+
+**Option 3: Import Just the Facade**
+
+```typescript
+// ✅ Minimal imports - just the facade pattern
+import { PortNumberFacade } from '@portnumbergenerator/core/facade';
+
+const facade = new PortNumberFacade();
+console.log(facade.frontendPortNumber); // 6969
+```
+
+This imports:
+- ✅ Facade class only
+- ✅ Minimal dependencies
+- **Result**: Tiny bundle (~20KB compiled)
+
+**Option 4: Import Utilities Only**
+
+```typescript
+// ✅ Import specific utility modules
+import { 
+  FormatConverter, 
+  MathUtility, 
+  StringUtility 
+} from '@portnumbergenerator/core/utilities';
+
+// Use utility functions without port generation
+const hex = FormatConverter.toHex(6969);        // "0x1b39"
+const factors = MathUtility.primeFactors(6969); // [3, 7, 331]
+const reversed = StringUtility.reverse("6969"); // "9696"
+```
+
+**Option 5: Import API Generators Only**
+
+```typescript
+// ✅ Import just REST or GraphQL generators
+import { RESTPortGenerator } from '@portnumbergenerator/core/api';
+
+const api = new RESTPortGenerator();
+// Only REST API code is bundled
+```
+
+### 📊 Bundle Size Comparison
+
+| Import Method | Bundle Size (compiled) | What's Included |
+|--------------|------------------------|-----------------|
+| Full (`@portnumbergenerator/core`) | ~500KB | Everything |
+| Legacy only (`/legacy`) | ~50KB | PortNumbers class |
+| Facade only (`/facade`) | ~20KB | Facade pattern |
+| Utilities only (`/utilities`) | ~30KB | Format/Math/String utils |
+| API only (`/api`) | ~40KB | REST/GraphQL generators |
+
+### 🎯 Best Practices
+
+**For Simple Use Cases:**
+```typescript
+// Just need the two port numbers? Use legacy:
+import { PortNumbers } from '@portnumbergenerator/core/legacy';
+```
+
+**For Enterprise Applications:**
+```typescript
+// Need full event sourcing, VM, factories? Use main entry:
+import { PortNumberGenerator } from '@portnumbergenerator/core';
+```
+
+**For API Integration:**
+```typescript
+// Building a REST API? Import just the API module:
+import { RESTPortGenerator } from '@portnumbergenerator/core/api';
+```
+
+**For Utilities:**
+```typescript
+// Need format conversion or math utilities?
+import { FormatConverter, MathUtility } from '@portnumbergenerator/core/utilities';
+```
+
+### 🔧 Named vs Default Exports
+
+All exports are **named exports** (not default), so you must use curly braces:
+
+```typescript
+// ✅ Correct
+import { PortNumbers } from '@portnumbergenerator/core/legacy';
+import { PortNumberGenerator } from '@portnumbergenerator/core';
+
+// ❌ Wrong - no default exports
+import PortNumbers from '@portnumbergenerator/core/legacy';
+```
+
+### 📦 TypeScript Type Definitions
+
+Type definitions are automatically included:
+
+```typescript
+import type { 
+  IPortContext, 
+  IPortService,
+  PortEvent 
+} from '@portnumbergenerator/core';
+
+// Or import types alongside values:
+import { 
+  PortNumbers, 
+  type IPortContext 
+} from '@portnumbergenerator/core/legacy';
+```
+
+### 🌍 CommonJS vs ES Modules
+
+The package supports both:
+
+```javascript
+// ES Modules (recommended)
+import { PortNumbers } from '@portnumbergenerator/core/legacy';
+
+// CommonJS (also works)
+const { PortNumbers } = require('@portnumbergenerator/core/legacy');
+```
+
+### 💡 Real-World Example
+
+```typescript
+// Small Node.js script - use legacy for minimal bundle
+import { PortNumbers } from '@portnumbergenerator/core/legacy';
+
+console.log(`Frontend: ${PortNumbers.frontendPortNumber()}`);
+console.log(`Backend: ${PortNumbers.backendPortNumber()}`);
+
+// Express.js API - use REST generator
+import { RESTPortGenerator } from '@portnumbergenerator/core/api';
+const app = new RESTPortGenerator();
+app.start(3000);
+
+// React/Vue app - use facade for clean component code
+import { PortNumberFacade } from '@portnumbergenerator/core/facade';
+const facade = new PortNumberFacade();
+const port = facade.frontendPortNumber;
+
+// Enterprise microservice - use full system
+import { PortNumberGenerator } from '@portnumbergenerator/core';
+const generator = new PortNumberGenerator();
+const diagnostics = generator.getDiagnostics();
+```
+
+### 🎓 Key Takeaway
+
+**You don't import the whole thing unless you need it!** The modular exports allow modern bundlers (Webpack, Rollup, esbuild, Vite) to tree-shake unused code, keeping your production bundles lean.
+
+**Rule of thumb:**
+- Need just port numbers? → Use `/legacy`
+- Need enterprise features? → Use main export
+- Need specific functionality? → Use subpath exports
 
 ---
 

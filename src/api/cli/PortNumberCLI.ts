@@ -1,27 +1,446 @@
 #!/usr/bin/env node
 
 /**
- * Command-Line Interface for Port Number Generator
+ * @fileoverview Enterprise Command-Line Interface for Port Number Generation
  *
- * Provides a comprehensive CLI for port number operations.
+ * This file contains the revolutionary command-line interface (CLI) for the
+ * Port Number Generator™ enterprise application. Because sometimes you need
+ * to generate port numbers from the command line instead of through our
+ * REST API, GraphQL endpoint, gRPC service, WebSocket connection, or the
+ * 47 other ways we've provided to access the same two numbers.
+ *
+ * @module api/cli
+ * @category API Layer
+ * @subcategory Command-Line Interface
+ * @since 1.0.0
+ * @version 4.2.0-CLI-ULTIMATE-EDITION
+ *
+ * @remarks
+ * This CLI implements the Command Pattern combined with the Strategy Pattern
+ * to provide a flexible, extensible, and hilariously over-engineered interface
+ * for port number operations. Each command is encapsulated as a first-class
+ * object with its own handler, options, and validation logic.
+ *
+ * **Architectural Highlights:**
+ *
+ * - **Command Pattern**: Each CLI command is a discrete, testable object
+ * - **Async/Await**: All operations are asynchronous (even the ones that don't need to be)
+ * - **Type Safety**: Full TypeScript coverage with strict type checking
+ * - **Extensibility**: New commands can be added without modifying existing code
+ * - **Validation**: Comprehensive input validation and error handling
+ * - **User Experience**: Helpful error messages and detailed help system
+ *
+ * **Available Commands:**
+ *
+ * - `generate`: Generate port numbers using various strategies
+ * - `reserve`: Reserve specific ports for later use
+ * - `release`: Release previously reserved ports
+ * - `check`: Check port availability
+ * - `list`: List all reserved ports
+ * - `range`: Find available ports in a range
+ * - `validate`: Validate port numbers
+ * - `stats`: Display system statistics
+ * - `version`: Display version information
+ * - `help`: Display help for commands
+ *
+ * **Generation Strategies:**
+ *
+ * - **random**: Random port generation within constraints
+ * - **sequential**: Sequential port allocation
+ * - **fibonacci**: Port numbers from the Fibonacci sequence
+ * - **prime**: Port numbers that are prime numbers
+ *
+ * **Design Philosophy:**
+ *
+ * We believe that generating port numbers should be as complicated as possible,
+ * and that includes the CLI. Why have a simple script when you can have a
+ * full-featured command-line application with subcommands, options, validation,
+ * error handling, and enterprise-grade abstractions?
+ *
+ * @example
+ * ```bash
+ * # Generate a random port
+ * $ port-gen generate
+ *
+ * # Generate multiple ports
+ * $ port-gen generate --count 5 --strategy fibonacci
+ *
+ * # Reserve a specific port
+ * $ port-gen reserve --port 8080 --metadata '{"service": "web-server"}'
+ *
+ * # Check port availability
+ * $ port-gen check --port 3000
+ *
+ * # List reserved ports
+ * $ port-gen list --format json
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Programmatic CLI usage
+ * const cli = new PortNumberCLI();
+ * await cli.run(['generate', '--strategy', 'prime', '--count', '3']);
+ * ```
+ *
+ * @see {@link CLICommand} for command structure
+ * @see {@link CLIOption} for option configuration
+ * @see {@link PortNumberGenerator} for the underlying port generation logic
+ *
+ * @author CLI Architecture Team
+ * @copyright 2024 PortNumberGenerator™ Corporation
+ * @license MIT (but with enterprise flair)
+ *
+ * @standards
+ * - POSIX CLI Standards (mostly compliant)
+ * - GNU Command-Line Conventions (when convenient)
+ * - The Twelve-Factor App Methodology (we think)
+ *
+ * @performance
+ * - Startup Time: < 100ms (acceptable for a CLI)
+ * - Memory Footprint: ~50MB (reasonable for Node.js)
+ * - Response Time: < 10ms for most operations
+ *
+ * @security
+ * - Input Validation: All user input is validated
+ * - No Shell Injection: Safe command parsing
+ * - No Eval: We don't use eval() (we're not monsters)
+ * - Error Messages: No sensitive information leaked
  */
 
+/**
+ * Interface representing a CLI command.
+ *
+ * Defines the structure of a command in our CLI system. Each command has a
+ * unique name, description, configurable options, and an async handler function
+ * that executes the command logic.
+ *
+ * This interface enables the Command Pattern, where each command is a
+ * first-class object that can be registered, discovered, validated, and
+ * executed independently.
+ *
+ * @interface CLICommand
+ * @category CLI Infrastructure
+ *
+ * @remarks
+ * Commands are the primary abstraction in our CLI architecture. They encapsulate
+ * all the metadata and behavior needed to expose functionality through the
+ * command line, including:
+ *
+ * - User-facing documentation (name, description)
+ * - Configuration schema (options with types and defaults)
+ * - Business logic (async handler function)
+ * - Validation rules (via option definitions)
+ *
+ * **Design Considerations:**
+ *
+ * - Commands MUST have unique names (enforced at registration)
+ * - Handlers MUST be async (consistency, even when not needed)
+ * - Options SHOULD provide clear descriptions
+ * - Commands SHOULD be stateless (state in CLI class)
+ *
+ * **Lifecycle:**
+ *
+ * 1. Command Registration: Defined and registered during CLI construction
+ * 2. Command Discovery: User invokes command by name
+ * 3. Argument Parsing: CLI parses arguments against option schema
+ * 4. Validation: Required options checked, types validated
+ * 5. Handler Execution: Async handler called with parsed arguments
+ * 6. Result Display: Handler output shown to user
+ *
+ * @example
+ * ```typescript
+ * const pingCommand: CLICommand = {
+ *   name: 'ping',
+ *   description: 'Check system availability',
+ *   options: [
+ *     {
+ *       name: 'host',
+ *       description: 'Host to ping',
+ *       required: true,
+ *       type: 'string'
+ *     }
+ *   ],
+ *   handler: async (args) => {
+ *     console.log(`Pinging ${args.host}...`);
+ *     // Ping logic here
+ *   }
+ * };
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface CLICommand {
+  /**
+   * The unique identifier for this command.
+   *
+   * Used to invoke the command from the command line and for command
+   * registration/lookup. MUST be unique across all commands in the CLI.
+   *
+   * @type {string}
+   * @example 'generate', 'reserve', 'validate'
+   */
   name: string;
+
+  /**
+   * Human-readable description of what this command does.
+   *
+   * Displayed in help output and command listings. SHOULD be concise
+   * but informative, ideally one sentence.
+   *
+   * @type {string}
+   * @example 'Generate a port number using specified strategy'
+   */
   description: string;
+
+  /**
+   * Array of options that can be passed to this command.
+   *
+   * Defines the command's configuration schema, including option names,
+   * types, defaults, and validation rules.
+   *
+   * @type {CLIOption[]}
+   * @see {@link CLIOption}
+   */
   options: CLIOption[];
+
+  /**
+   * Async function that executes the command logic.
+   *
+   * Receives parsed and validated arguments and performs the command's
+   * business logic. MUST be async for consistency, even if the operation
+   * is synchronous.
+   *
+   * @param {any} args - Parsed command-line arguments
+   * @returns {Promise<void>} Resolves when command completes
+   * @throws {Error} If command execution fails
+   *
+   * @remarks
+   * Handler Contract:
+   * - MUST be async
+   * - SHOULD handle errors gracefully
+   * - SHOULD provide user-friendly output
+   * - SHOULD log errors to stderr
+   * - MAY exit process with non-zero code on failure
+   */
   handler: (args: any) => Promise<void>;
 }
 
+/**
+ * Interface representing a CLI option (flag/argument).
+ *
+ * Defines the structure of a command-line option that can be passed to a
+ * command. Options can be required or optional, have type constraints,
+ * default values, and short aliases for convenience.
+ *
+ * @interface CLIOption
+ * @category CLI Infrastructure
+ *
+ * @remarks
+ * Options provide the configuration schema for commands. They enable:
+ *
+ * - **Type Safety**: Runtime type validation of user input
+ * - **Defaults**: Sensible default values when options omitted
+ * - **Validation**: Required option enforcement
+ * - **Convenience**: Short aliases for common options (e.g., -p for --port)
+ * - **Documentation**: Self-documenting CLI through descriptions
+ *
+ * **Naming Conventions:**
+ *
+ * - Long names: lowercase, dash-separated (e.g., 'max-port')
+ * - Aliases: single letter, lowercase (e.g., 'p', 'm', 'v')
+ * - Boolean flags: positive form (e.g., 'verbose', not 'no-quiet')
+ *
+ * **Type System:**
+ *
+ * - **string**: Text values (default if type not specified)
+ * - **number**: Integer or floating-point numbers
+ * - **boolean**: Flags (presence = true, absence = false)
+ *
+ * @example
+ * ```typescript
+ * const portOption: CLIOption = {
+ *   name: 'port',
+ *   alias: 'p',
+ *   description: 'Port number to check',
+ *   required: true,
+ *   type: 'number'
+ * };
+ * ```
+ *
+ * @example
+ * ```typescript
+ * const verboseOption: CLIOption = {
+ *   name: 'verbose',
+ *   alias: 'v',
+ *   description: 'Enable verbose output',
+ *   type: 'boolean',
+ *   default: false
+ * };
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export interface CLIOption {
+  /**
+   * The full name of the option.
+   *
+   * Used as the long-form flag (e.g., --name). SHOULD be descriptive
+   * and use dash-separated lowercase for multi-word names.
+   *
+   * @type {string}
+   * @example 'port', 'max-value', 'output-format'
+   */
   name: string;
+
+  /**
+   * Optional short alias for the option.
+   *
+   * Single-character shorthand for convenience (e.g., -p for --port).
+   * SHOULD be a single lowercase letter.
+   *
+   * @type {string | undefined}
+   * @optional
+   * @example 'p', 'm', 'v'
+   */
   alias?: string;
+
+  /**
+   * Human-readable description of what this option does.
+   *
+   * Displayed in help output. SHOULD be concise and explain the option's
+   * purpose and expected format.
+   *
+   * @type {string}
+   * @example 'Port number to validate (1-65535)'
+   */
   description: string;
+
+  /**
+   * Whether this option must be provided by the user.
+   *
+   * If true, the CLI will error if the option is not provided.
+   * If false or undefined, the option is optional.
+   *
+   * @type {boolean | undefined}
+   * @optional
+   * @default false
+   */
   required?: boolean;
+
+  /**
+   * Default value used when option is not provided.
+   *
+   * Only applies to optional options. Type SHOULD match the option's
+   * declared type.
+   *
+   * @type {any}
+   * @optional
+   */
   default?: any;
+
+  /**
+   * The expected type of the option value.
+   *
+   * Used for runtime validation and type coercion. If not specified,
+   * defaults to 'string'.
+   *
+   * @type {'string' | 'number' | 'boolean' | undefined}
+   * @optional
+   * @default 'string'
+   */
   type?: 'string' | 'number' | 'boolean';
 }
 
+/**
+ * Enterprise Command-Line Interface for Port Number Generation.
+ *
+ * The main CLI class that orchestrates command registration, argument parsing,
+ * validation, and command execution. Implements the Command Pattern with
+ * support for subcommands, options, validation, and comprehensive error handling.
+ *
+ * @class PortNumberCLI
+ * @category CLI Infrastructure
+ *
+ * @remarks
+ * This class serves as the entry point for all CLI operations. It manages:
+ *
+ * - **Command Registry**: Map of available commands
+ * - **Port Reservations**: In-memory tracking of reserved ports
+ * - **Argument Parsing**: Converting argv into structured arguments
+ * - **Validation**: Ensuring required options and valid types
+ * - **Execution**: Invoking command handlers
+ * - **Error Handling**: User-friendly error messages
+ *
+ * **Architecture:**
+ *
+ * ```
+ * ┌─────────────────────┐
+ * │  PortNumberCLI      │
+ * ├─────────────────────┤
+ * │ - commands: Map     │
+ * │ - reservedPorts: Set│
+ * ├─────────────────────┤
+ * │ + run(args)         │
+ * │ + registerCommand() │
+ * │ - parseArgs()       │
+ * │ - validateArgs()    │
+ * │ - executeCommand()  │
+ * └─────────────────────┘
+ *         │
+ *         ├── CLICommand (generate)
+ *         ├── CLICommand (reserve)
+ *         ├── CLICommand (release)
+ *         ├── CLICommand (check)
+ *         └── ... (more commands)
+ * ```
+ *
+ * **State Management:**
+ *
+ * - Commands are registered once during construction
+ * - Port reservations are tracked in-memory (not persisted)
+ * - CLI instances are typically short-lived (one per invocation)
+ *
+ * **Extension Points:**
+ *
+ * - New commands can be added via registerCommand()
+ * - Custom strategies can be implemented
+ * - Output formatters can be customized
+ *
+ * @example
+ * ```typescript
+ * // Typical CLI usage
+ * const cli = new PortNumberCLI();
+ * await cli.run(process.argv.slice(2));
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Programmatic usage
+ * const cli = new PortNumberCLI();
+ * await cli.run(['generate', '--strategy', 'prime', '--count', '5']);
+ * await cli.run(['reserve', '--port', '8080']);
+ * await cli.run(['list', '--format', 'json']);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Custom command registration
+ * const cli = new PortNumberCLI();
+ * cli.registerCommand({
+ *   name: 'custom',
+ *   description: 'My custom command',
+ *   options: [],
+ *   handler: async (args) => {
+ *     console.log('Custom command executed!');
+ *   }
+ * });
+ * ```
+ *
+ * @since 1.0.0
+ * @public
+ */
 export class PortNumberCLI {
   private commands: Map<string, CLICommand> = new Map();
   private reservedPorts: Set<number> = new Set();

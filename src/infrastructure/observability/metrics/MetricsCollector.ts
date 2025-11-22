@@ -1,3 +1,70 @@
+/**
+ * @fileoverview Enterprise Metrics Collection and Observability Infrastructure
+ * @module @portnumbergenerator/infrastructure/observability/metrics
+ * @category Infrastructure Layer - Observability
+ * @since 3.0.0
+ *
+ * @description
+ * THE ULTIMATE METRICS COLLECTION SYSTEM - Measuring what matters!
+ *
+ * This module provides production-grade metrics collection infrastructure for
+ * monitoring, alerting, and observing port number generation operations. Because
+ * if you can't measure it, you can't manage it (or so the consultants told us).
+ *
+ * **Why Metrics for Port Numbers?**
+ * - To justify our existence to management
+ * - Because Prometheus is cool and we want to be cool
+ * - To make impressive Grafana dashboards
+ * - To know when things break (hopefully before users do)
+ * - To look professional in incident post-mortems
+ *
+ * **Supported Metric Types:**
+ * - Counter: Monotonically increasing values (generations, requests)
+ * - Gauge: Values that go up and down (active connections, queue size)
+ * - Histogram: Distribution of values (response times, port ranges)
+ * - Summary: Statistical summaries (percentiles, quantiles)
+ *
+ * **Integration:**
+ * - Prometheus format export (industry standard!)
+ * - Custom label support (for that multi-dimensional feel)
+ * - Automatic timestamp tracking (because time matters)
+ * - In-memory storage (until restart, then it's gone!)
+ *
+ * **Use Cases:**
+ * - Monitor port generation rate
+ * - Track error rates and types
+ * - Measure response latencies
+ * - Count active WebSocket connections
+ * - Detect anomalies (if we build that)
+ * - Create pretty graphs for demos
+ *
+ * @example
+ * ```typescript
+ * const metrics = new MetricsCollector();
+ * const counter = metrics.counter('port_generations_total');
+ * counter.inc(); // Increment by 1
+ * ```
+ *
+ * @author The Observability Evangelization Team (OET)
+ * @copyright 2024 Port Number Generator Corp.
+ * @license MIT
+ */
+
+/**
+ * Metric Type Enumeration
+ *
+ * @enum {string} MetricType
+ * @description
+ * Defines all supported metric types following Prometheus conventions.
+ *
+ * **Metric Types:**
+ * - COUNTER: Cumulative metric that only increases (resets on restart)
+ * - GAUGE: Metric that can go up or down (current value)
+ * - HISTOGRAM: Samples observations and counts them in buckets
+ * - SUMMARY: Samples observations and calculates quantiles
+ *
+ * @since 3.0.0
+ */
 export enum MetricType {
   COUNTER = 'counter',
   GAUGE = 'gauge',
@@ -5,6 +72,21 @@ export enum MetricType {
   SUMMARY = 'summary'
 }
 
+/**
+ * Metric Data Structure
+ *
+ * @interface Metric
+ * @description
+ * Represents a single metric observation with metadata.
+ *
+ * @property {string} name - Metric name (should follow naming conventions)
+ * @property {MetricType} type - Type of metric
+ * @property {number} value - Current metric value
+ * @property {Record<string, string>} [labels] - Optional labels for dimensions
+ * @property {number} timestamp - Unix timestamp in milliseconds
+ *
+ * @since 3.0.0
+ */
 export interface Metric {
   name: string;
   type: MetricType;
@@ -13,6 +95,16 @@ export interface Metric {
   timestamp: number;
 }
 
+/**
+ * Metrics Collector Interface
+ *
+ * @interface IMetricsCollector
+ * @description
+ * Contract for metrics collection implementations.
+ * Defines methods for creating and managing different metric types.
+ *
+ * @since 3.0.0
+ */
 export interface IMetricsCollector {
   counter(name: string, labels?: Record<string, string>): Counter;
   gauge(name: string, labels?: Record<string, string>): Gauge;
@@ -24,6 +116,38 @@ export interface IMetricsCollector {
   exportPrometheus(): string;
 }
 
+/**
+ * Counter Metric Implementation
+ *
+ * @class Counter
+ * @description
+ * THE COUNTER - Going up since initialization!
+ *
+ * Represents a cumulative metric that can only increase (except when reset).
+ * Perfect for counting events like requests, errors, or generated ports.
+ *
+ * **Characteristics:**
+ * - Starts at 0
+ * - Can only increment (no decrement)
+ * - Resets to 0 on restart
+ * - Thread-safe (thanks JavaScript!)
+ *
+ * **Use Cases:**
+ * - Total port generations
+ * - Total HTTP requests
+ * - Total errors
+ * - Total bytes transferred
+ *
+ * @example
+ * ```typescript
+ * const counter = metrics.counter('requests_total', { method: 'POST' });
+ * counter.inc();     // Increment by 1
+ * counter.inc(5);    // Increment by 5
+ * console.log(counter.getValue()); // Get current value
+ * ```
+ *
+ * @since 3.0.0
+ */
 export class Counter {
   private value: number = 0;
 
@@ -56,6 +180,39 @@ export class Counter {
   }
 }
 
+/**
+ * Gauge Metric Implementation
+ *
+ * @class Gauge
+ * @description
+ * THE GAUGE - Going up and down like a rollercoaster!
+ *
+ * Represents a metric that can increase or decrease. Perfect for tracking
+ * current values like active connections, queue sizes, or memory usage.
+ *
+ * **Characteristics:**
+ * - Starts at 0
+ * - Can increase or decrease
+ * - Represents current state
+ * - No historical accumulation
+ *
+ * **Use Cases:**
+ * - Active WebSocket connections
+ * - Queue depth
+ * - Memory usage
+ * - CPU usage
+ * - Current temperature
+ *
+ * @example
+ * ```typescript
+ * const gauge = metrics.gauge('active_connections');
+ * gauge.set(10);   // Set to specific value
+ * gauge.inc();     // Increment by 1
+ * gauge.dec(2);    // Decrement by 2
+ * ```
+ *
+ * @since 3.0.0
+ */
 export class Gauge {
   private value: number = 0;
 
@@ -107,11 +264,50 @@ export class Gauge {
   }
 }
 
+/**
+ * Histogram Metric Implementation
+ *
+ * @class Histogram
+ * @description
+ * THE HISTOGRAM - Bucketing your observations!
+ *
+ * Tracks distribution of values by counting observations in configurable buckets.
+ * Perfect for measuring request durations, response sizes, or any value distribution.
+ *
+ * **Characteristics:**
+ * - Configurable bucket boundaries
+ * - Cumulative bucket counts
+ * - Tracks sum and count
+ * - Can calculate average
+ *
+ * **Use Cases:**
+ * - Response time distribution
+ * - Request size distribution
+ * - Port number distribution
+ * - Latency percentiles
+ *
+ * @example
+ * ```typescript
+ * const histogram = metrics.histogram('request_duration_seconds',
+ *   [0.1, 0.5, 1, 5, 10]);
+ * histogram.observe(0.234); // Record 234ms request
+ * ```
+ *
+ * @since 3.0.0
+ */
 export class Histogram {
   private buckets: Map<number, number> = new Map();
   private sum: number = 0;
   private count: number = 0;
 
+  /**
+   * Creates a new Histogram instance.
+   *
+   * @param {string} name - Metric name
+   * @param {number[]} buckets - Bucket boundaries (default: standard latency buckets)
+   * @param {Record<string, string>} labels - Optional labels
+   * @param {MetricsCollector} collector - Parent collector
+   */
   constructor(
     private readonly name: string,
     buckets: number[] = [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
@@ -121,6 +317,12 @@ export class Histogram {
     buckets.forEach(bucket => this.buckets.set(bucket, 0));
   }
 
+  /**
+   * Records an observation in the histogram.
+   *
+   * @param {number} value - Value to observe
+   * @returns {void}
+   */
   observe(value: number): void {
     this.sum += value;
     this.count++;
@@ -145,18 +347,38 @@ export class Histogram {
     return new Map(this.buckets);
   }
 
+  /**
+   * Gets the sum of all observed values.
+   *
+   * @returns {number} Sum of observations
+   */
   getSum(): number {
     return this.sum;
   }
 
+  /**
+   * Gets the count of observations.
+   *
+   * @returns {number} Number of observations
+   */
   getCount(): number {
     return this.count;
   }
 
+  /**
+   * Gets the average of all observed values.
+   *
+   * @returns {number} Average value
+   */
   getAverage(): number {
     return this.count > 0 ? this.sum / this.count : 0;
   }
 
+  /**
+   * Resets all histogram data.
+   *
+   * @returns {void}
+   */
   reset(): void {
     this.buckets.forEach((_, key) => this.buckets.set(key, 0));
     this.sum = 0;
@@ -164,12 +386,51 @@ export class Histogram {
   }
 }
 
+/**
+ * Summary Metric Implementation
+ *
+ * @class Summary
+ * @description
+ * THE SUMMARY - Statistical excellence!
+ *
+ * Tracks observations and calculates quantiles (percentiles).
+ * Perfect for measuring latencies where you need precise percentiles
+ * without the overhead of a full histogram.
+ *
+ * **Characteristics:**
+ * - Stores individual observations (bounded by maxSize)
+ * - Calculates exact quantiles
+ * - Tracks sum and count
+ * - More accurate than histogram for percentiles
+ *
+ * **Use Cases:**
+ * - Response time percentiles (p50, p95, p99)
+ * - Request size percentiles
+ * - Custom quantile calculations
+ *
+ * @example
+ * ```typescript
+ * const summary = metrics.summary('request_duration_seconds', [0.5, 0.95, 0.99]);
+ * summary.observe(0.123);
+ * const p95 = summary.getPercentile(0.95);
+ * ```
+ *
+ * @since 3.0.0
+ */
 export class Summary {
   private observations: number[] = [];
   private readonly maxSize: number = 1000;
   private sum: number = 0;
   private count: number = 0;
 
+  /**
+   * Creates a new Summary instance.
+   *
+   * @param {string} name - Metric name
+   * @param {number[]} percentiles - Quantiles to calculate (0-1 range)
+   * @param {Record<string, string>} labels - Optional labels
+   * @param {MetricsCollector} collector - Parent collector
+   */
   constructor(
     private readonly name: string,
     private readonly percentiles: number[] = [0.5, 0.9, 0.95, 0.99],
@@ -177,6 +438,12 @@ export class Summary {
     private readonly collector: MetricsCollector
   ) {}
 
+  /**
+   * Records an observation in the summary.
+   *
+   * @param {number} value - Value to observe
+   * @returns {void}
+   */
   observe(value: number): void {
     this.observations.push(value);
     this.sum += value;
@@ -228,6 +495,11 @@ export class Summary {
     return this.count > 0 ? this.sum / this.count : 0;
   }
 
+  /**
+   * Resets all summary data.
+   *
+   * @returns {void}
+   */
   reset(): void {
     this.observations = [];
     this.sum = 0;
@@ -235,6 +507,41 @@ export class Summary {
   }
 }
 
+/**
+ * Main Metrics Collector Implementation
+ *
+ * @class MetricsCollector
+ * @implements {IMetricsCollector}
+ * @description
+ * THE METRICS ORCHESTRATOR - Bringing it all together!
+ *
+ * Central coordinator for all metrics collection. Creates and manages
+ * Counter, Gauge, Histogram, and Summary metrics. Stores observations
+ * and exports them in Prometheus format.
+ *
+ * **Core Responsibilities:**
+ * - Metric creation and registration
+ * - Observation storage
+ * - Prometheus format export
+ * - Reset functionality
+ *
+ * **Features:**
+ * - In-memory metric storage
+ * - Label support for dimensions
+ * - Prometheus-compatible export
+ * - Thread-safe (single-threaded JS)
+ *
+ * @example
+ * ```typescript
+ * const collector = new MetricsCollector();
+ * const requests = collector.counter('http_requests_total', { method: 'GET' });
+ * requests.inc();
+ * console.log(collector.exportPrometheus());
+ * ```
+ *
+ * @since 3.0.0
+ * @public
+ */
 export class MetricsCollector implements IMetricsCollector {
   private counters: Map<string, Counter> = new Map();
   private gauges: Map<string, Gauge> = new Map();
@@ -243,6 +550,25 @@ export class MetricsCollector implements IMetricsCollector {
   private metrics: Metric[] = [];
   private readonly maxMetricsHistory = 10000;
 
+  /**
+   * Creates or retrieves a Counter metric.
+   *
+   * @param {string} name - Metric name (should follow naming conventions)
+   * @param {Record<string, string>} [labels] - Optional labels for dimensions
+   * @returns {Counter} Counter instance
+   *
+   * @description
+   * Creates a new counter or returns existing counter with same name and labels.
+   * Counters are cached to ensure consistent metric instances across calls.
+   *
+   * @example
+   * ```typescript
+   * const counter = collector.counter('requests_total', { method: 'GET' });
+   * counter.inc();
+   * ```
+   *
+   * @since 3.0.0
+   */
   counter(name: string, labels?: Record<string, string>): Counter {
     const key = this.getMetricKey(name, labels);
 
@@ -253,6 +579,24 @@ export class MetricsCollector implements IMetricsCollector {
     return this.counters.get(key)!;
   }
 
+  /**
+   * Creates or retrieves a Gauge metric.
+   *
+   * @param {string} name - Metric name
+   * @param {Record<string, string>} [labels] - Optional labels
+   * @returns {Gauge} Gauge instance
+   *
+   * @description
+   * Creates a new gauge or returns existing gauge with same name and labels.
+   *
+   * @example
+   * ```typescript
+   * const gauge = collector.gauge('active_connections');
+   * gauge.set(42);
+   * ```
+   *
+   * @since 3.0.0
+   */
   gauge(name: string, labels?: Record<string, string>): Gauge {
     const key = this.getMetricKey(name, labels);
 
@@ -263,6 +607,25 @@ export class MetricsCollector implements IMetricsCollector {
     return this.gauges.get(key)!;
   }
 
+  /**
+   * Creates or retrieves a Histogram metric.
+   *
+   * @param {string} name - Metric name
+   * @param {number[]} [buckets] - Bucket boundaries
+   * @param {Record<string, string>} [labels] - Optional labels
+   * @returns {Histogram} Histogram instance
+   *
+   * @description
+   * Creates a new histogram or returns existing histogram with same name and labels.
+   *
+   * @example
+   * ```typescript
+   * const histogram = collector.histogram('request_duration_seconds', [0.1, 0.5, 1]);
+   * histogram.observe(0.234);
+   * ```
+   *
+   * @since 3.0.0
+   */
   histogram(name: string, buckets?: number[], labels?: Record<string, string>): Histogram {
     const key = this.getMetricKey(name, labels);
 
@@ -273,6 +636,25 @@ export class MetricsCollector implements IMetricsCollector {
     return this.histograms.get(key)!;
   }
 
+  /**
+   * Creates or retrieves a Summary metric.
+   *
+   * @param {string} name - Metric name
+   * @param {number[]} [percentiles] - Percentiles to calculate
+   * @param {Record<string, string>} [labels] - Optional labels
+   * @returns {Summary} Summary instance
+   *
+   * @description
+   * Creates a new summary or returns existing summary with same name and labels.
+   *
+   * @example
+   * ```typescript
+   * const summary = collector.summary('response_time', [0.5, 0.95, 0.99]);
+   * summary.observe(0.123);
+   * ```
+   *
+   * @since 3.0.0
+   */
   summary(name: string, percentiles?: number[], labels?: Record<string, string>): Summary {
     const key = this.getMetricKey(name, labels);
 
@@ -283,6 +665,19 @@ export class MetricsCollector implements IMetricsCollector {
     return this.summaries.get(key)!;
   }
 
+  /**
+   * Records a metric observation.
+   *
+   * @param {Metric} metric - Metric observation to record
+   * @returns {void}
+   *
+   * @description
+   * Internal method called by metric instances to record observations.
+   * Maintains bounded history of metric observations (last 10,000).
+   *
+   * @since 3.0.0
+   * @internal
+   */
   recordMetric(metric: Metric): void {
     this.metrics.push(metric);
 
@@ -292,10 +687,31 @@ export class MetricsCollector implements IMetricsCollector {
     }
   }
 
+  /**
+   * Gets all recorded metrics.
+   *
+   * @returns {Metric[]} Array of all metric observations
+   *
+   * @description
+   * Returns copy of all recorded metric observations.
+   *
+   * @since 3.0.0
+   */
   getMetrics(): Metric[] {
     return [...this.metrics];
   }
 
+  /**
+   * Resets all metrics to initial state.
+   *
+   * @returns {void}
+   *
+   * @description
+   * Resets all counters, gauges, histograms, and summaries to zero/empty.
+   * Clears all metric history. Use cautiously in production.
+   *
+   * @since 3.0.0
+   */
   reset(): void {
     this.counters.forEach(counter => counter.reset());
     this.gauges.forEach(gauge => gauge.reset());
@@ -304,6 +720,35 @@ export class MetricsCollector implements IMetricsCollector {
     this.metrics = [];
   }
 
+  /**
+   * Exports all metrics in Prometheus text format.
+   *
+   * @returns {string} Prometheus-formatted metrics
+   *
+   * @description
+   * THE PROMETHEUS EXPORTER - Making Grafana happy!
+   *
+   * Exports all metrics in Prometheus text exposition format, ready
+   * to be scraped by Prometheus server.
+   *
+   * **Format:**
+   * ```
+   * # HELP metric_name Description
+   * # TYPE metric_name counter
+   * metric_name{label="value"} 42 timestamp
+   * ```
+   *
+   * @example
+   * ```typescript
+   * const output = collector.exportPrometheus();
+   * console.log(output);
+   * // # HELP requests_total Total HTTP requests
+   * // # TYPE requests_total counter
+   * // requests_total{method="GET"} 42
+   * ```
+   *
+   * @since 3.0.0
+   */
   exportPrometheus(): string {
     const lines: string[] = [];
 
@@ -352,6 +797,25 @@ export class MetricsCollector implements IMetricsCollector {
     return lines.join('\n') + '\n';
   }
 
+  /**
+   * Exports all metrics in JSON format.
+   *
+   * @returns {object} JSON object containing all metrics
+   *
+   * @description
+   * THE JSON EXPORTER - For when Prometheus is too mainstream!
+   *
+   * Exports all metrics in structured JSON format, useful for
+   * custom dashboards, APIs, or debugging.
+   *
+   * @example
+   * ```typescript
+   * const json = collector.exportJson();
+   * console.log(JSON.stringify(json, null, 2));
+   * ```
+   *
+   * @since 3.0.0
+   */
   exportJson(): object {
     return {
       counters: Array.from(this.counters.entries()).map(([key, counter]) => ({
@@ -383,6 +847,38 @@ export class MetricsCollector implements IMetricsCollector {
     };
   }
 
+  /**
+   * Generates a unique key for a metric based on name and labels.
+   *
+   * @private
+   * @param {string} name - Metric name
+   * @param {Record<string, string>} [labels] - Optional labels
+   * @returns {string} Unique metric key
+   *
+   * @description
+   * THE KEY GENERATOR - Uniquely identifying metrics!
+   *
+   * Creates a unique identifier for a metric by combining name and labels.
+   * Used for caching metric instances to ensure consistency.
+   *
+   * **Key Format:**
+   * - Without labels: `metric_name`
+   * - With labels: `metric_name{label1=value1,label2=value2}`
+   *
+   * **Why Cache Metrics?**
+   * - Ensures same metric instance for same name+labels
+   * - Prevents duplicate metric registration
+   * - Maintains consistent state
+   * - Reduces memory overhead
+   *
+   * @example
+   * ```typescript
+   * getMetricKey('requests', { method: 'GET' });
+   * // Returns: 'requests{method=GET}'
+   * ```
+   *
+   * @since 3.0.0
+   */
   private getMetricKey(name: string, labels?: Record<string, string>): string {
     const labelStr = labels
       ? Object.entries(labels)
@@ -393,6 +889,33 @@ export class MetricsCollector implements IMetricsCollector {
     return `${name}{${labelStr}}`;
   }
 
+  /**
+   * Formats a single metric in Prometheus text format.
+   *
+   * @private
+   * @param {string} name - Metric name
+   * @param {number} value - Metric value
+   * @param {Record<string, string>} [labels] - Optional labels
+   * @returns {string} Formatted Prometheus metric line
+   *
+   * @description
+   * THE PROMETHEUS FORMATTER - Making metrics pretty!
+   *
+   * Formats a single metric observation in Prometheus exposition format.
+   * Handles label formatting and escaping.
+   *
+   * **Format:**
+   * - With labels: `metric_name{label1="value1",label2="value2"} 42`
+   * - Without labels: `metric_name 42`
+   *
+   * @example
+   * ```typescript
+   * formatPrometheusMetric('requests_total', 42, { method: 'GET' });
+   * // Returns: 'requests_total{method="GET"} 42'
+   * ```
+   *
+   * @since 3.0.0
+   */
   private formatPrometheusMetric(name: string, value: number, labels?: Record<string, string>): string {
     if (!labels || Object.keys(labels).length === 0) {
       return `${name} ${value}`;
