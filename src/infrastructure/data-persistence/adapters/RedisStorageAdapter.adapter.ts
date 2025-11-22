@@ -1,5 +1,5 @@
 import { BaseStorageAdapter } from './BaseStorageAdapter.adapter.js';
-import { PortReservation, StorageAdapterConfig } from '../interfaces/IStorageAdapter.interface.js';
+import type { PortReservation, StorageAdapterConfig } from '../interfaces/IStorageAdapter.interface.js';
 
 /**
  * Redis Storage Adapter for distributed port reservation

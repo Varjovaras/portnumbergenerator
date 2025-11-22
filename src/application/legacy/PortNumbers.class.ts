@@ -32,7 +32,7 @@
  * ```
  */
 
-import { SEX_NUMBER, SNOOP_DOGG_NUMBER } from "../../../types.js";
+import { SEX_NUMBER, SNOOP_DOGG_NUMBER } from "../../types";
 import type { PortNumberConfig } from "./PortNumberConfig.interface.js";
 
 /**

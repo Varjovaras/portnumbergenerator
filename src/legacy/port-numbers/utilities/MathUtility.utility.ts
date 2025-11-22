@@ -1,4 +1,4 @@
-/**
+ /**
  * @fileoverview MathUtility - Mathematical operations and number theory utilities
  * @module @portnumbergenerator/legacy/utilities
  * @category Legacy Layer - Utilities

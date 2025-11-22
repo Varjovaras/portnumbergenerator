@@ -1,4 +1,4 @@
-import { IShardingStrategy, ShardDistribution } from '../interfaces/IShardingStrategy.interface.js';
+import type { IShardingStrategy, ShardDistribution } from '../interfaces/IShardingStrategy.interface.js';
 
 /**
  * Range-Based Sharding Strategy
