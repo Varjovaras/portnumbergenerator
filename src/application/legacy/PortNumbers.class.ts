@@ -209,118 +209,583 @@ export class PortNumbers {
 		return this.backendPortNumber().toString(2);
 	}
 
+	/**
+	 * Checks if frontend port is an even number.
+	 *
+	 * @returns {boolean} True if even, false if odd
+	 *
+	 * @description
+	 * THE EVENNESS DETECTOR - Is it divisible by 2?
+	 *
+	 * Determines whether the frontend port number is even by checking
+	 * if it's divisible by 2. Because sometimes you need to know if
+	 * your port is even for... reasons.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.isFrontendPortEven(); // false (6969 is odd)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	isFrontendPortEven(): boolean {
 		return this.frontendPortNumber() % 2 === 0;
 	}
 
+	/**
+	 * Checks if backend port is an even number.
+	 *
+	 * @returns {boolean} True if even, false if odd
+	 *
+	 * @description
+	 * Determines whether the backend port number is even.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.isBackendPortEven(); // false (42069 is odd)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	isBackendPortEven(): boolean {
 		return this.backendPortNumber() % 2 === 0;
 	}
 
+	/**
+	 * Checks if frontend port is an odd number.
+	 *
+	 * @returns {boolean} True if odd, false if even
+	 *
+	 * @description
+	 * THE ODDNESS ORACLE - The inverse of evenness!
+	 *
+	 * Determines whether the frontend port number is odd by checking
+	 * if it's NOT even. Revolutionary logic, we know.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.isFrontendPortOdd(); // true (6969 is odd)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	isFrontendPortOdd(): boolean {
 		return !this.isFrontendPortEven();
 	}
 
+	/**
+	 * Checks if backend port is an odd number.
+	 *
+	 * @returns {boolean} True if odd, false if even
+	 *
+	 * @description
+	 * Determines whether the backend port number is odd.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.isBackendPortOdd(); // true (42069 is odd)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	isBackendPortOdd(): boolean {
 		return !this.isBackendPortEven();
 	}
 
+	/**
+	 * Calculates the square of the frontend port.
+	 *
+	 * @returns {number} Frontend port squared
+	 *
+	 * @description
+	 * THE SQUARER - Multiplying by itself since forever!
+	 *
+	 * Raises the frontend port to the power of 2. Useful for calculating
+	 * areas, comparing magnitudes, or just showing off mathematical prowess.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getFrontendPortSquared(); // 48566961 (6969²)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getFrontendPortSquared(): number {
 		return this.frontendPortNumber() ** 2;
 	}
 
+	/**
+	 * Calculates the square of the backend port.
+	 *
+	 * @returns {number} Backend port squared
+	 *
+	 * @description
+	 * Raises the backend port to the power of 2.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getBackendPortSquared(); // 1769797761 (42069²)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getBackendPortSquared(): number {
 		return this.backendPortNumber() ** 2;
 	}
 
+	/**
+	 * Calculates the cube of the frontend port.
+	 *
+	 * @returns {number} Frontend port cubed
+	 *
+	 * @description
+	 * THE CUBER - Taking it to the third dimension!
+	 *
+	 * Raises the frontend port to the power of 3. For when squared
+	 * just isn't impressive enough.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getFrontendPortCubed(); // 338368187409 (6969³)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getFrontendPortCubed(): number {
 		return this.frontendPortNumber() ** 3;
 	}
 
+	/**
+	 * Calculates the cube of the backend port.
+	 *
+	 * @returns {number} Backend port cubed
+	 *
+	 * @description
+	 * Raises the backend port to the power of 3.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getBackendPortCubed(); // 74454763005509 (42069³)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getBackendPortCubed(): number {
 		return this.backendPortNumber() ** 3;
 	}
 
+	/**
+	 * Calculates the square root of the frontend port.
+	 *
+	 * @returns {number} Square root of frontend port
+	 *
+	 * @description
+	 * THE ROOT EXTRACTOR - Finding what was squared!
+	 *
+	 * Calculates the square root of the frontend port. Returns a decimal
+	 * because perfect squares are for wimps.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getFrontendPortSqrt(); // 83.4805... (√6969)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getFrontendPortSqrt(): number {
 		return Math.sqrt(this.frontendPortNumber());
 	}
 
+	/**
+	 * Calculates the square root of the backend port.
+	 *
+	 * @returns {number} Square root of backend port
+	 *
+	 * @description
+	 * Calculates the square root of the backend port.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getBackendPortSqrt(); // 205.1072... (√42069)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getBackendPortSqrt(): number {
 		return Math.sqrt(this.backendPortNumber());
 	}
 
+	/**
+	 * Gets the frontend port number with digits reversed.
+	 *
+	 * @returns {string} Port number with digits in reverse order
+	 *
+	 * @description
+	 * THE REVERSER - Reading numbers backwards!
+	 *
+	 * Takes the frontend port number and reverses its digits. Useful for
+	 * palindrome checking, mirror operations, or confusing people.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getFrontendPortReversed(); // "9696" (reverse of 6969)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getFrontendPortReversed(): string {
 		return this.getFrontendPortAsString().split("").reverse().join("");
 	}
 
+	/**
+	 * Gets the backend port number with digits reversed.
+	 *
+	 * @returns {string} Port number with digits in reverse order
+	 *
+	 * @description
+	 * Reverses the digits of the backend port number.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getBackendPortReversed(); // "96024" (reverse of 42069)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getBackendPortReversed(): string {
 		return this.getBackendPortAsString().split("").reverse().join("");
 	}
 
+	/**
+	 * Calculates the sum of both ports.
+	 *
+	 * @returns {number} Sum of frontend and backend ports
+	 *
+	 * @description
+	 * THE ADDER - Bringing ports together!
+	 *
+	 * Adds the frontend and backend ports together. Basic arithmetic,
+	 * but wrapped in a method for that enterprise feel.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getSumOfPorts(); // 49038 (6969 + 42069)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getSumOfPorts(): number {
 		return this.frontendPortNumber() + this.backendPortNumber();
 	}
 
+	/**
+	 * Calculates the difference between ports.
+	 *
+	 * @returns {number} Backend port minus frontend port
+	 *
+	 * @description
+	 * THE SUBTRACTOR - How far apart are they?
+	 *
+	 * Subtracts frontend from backend port. Always positive because
+	 * backend is always larger. That's just how we roll.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getDifferenceOfPorts(); // 35100 (42069 - 6969)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getDifferenceOfPorts(): number {
 		return this.backendPortNumber() - this.frontendPortNumber();
 	}
 
+	/**
+	 * Calculates the product of both ports.
+	 *
+	 * @returns {number} Frontend port multiplied by backend port
+	 *
+	 * @description
+	 * THE MULTIPLIER - Making big numbers bigger!
+	 *
+	 * Multiplies the two ports together. Results in a very large number
+	 * that's probably not useful for anything practical.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getProductOfPorts(); // 293186661 (6969 × 42069)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getProductOfPorts(): number {
 		return this.frontendPortNumber() * this.backendPortNumber();
 	}
 
+	/**
+	 * Calculates the quotient of ports.
+	 *
+	 * @returns {number} Backend port divided by frontend port
+	 *
+	 * @description
+	 * THE DIVIDER - How many times bigger?
+	 *
+	 * Divides backend by frontend. Shows how many times larger the
+	 * backend port is compared to frontend.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getQuotientOfPorts(); // ~6.037 (42069 ÷ 6969)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getQuotientOfPorts(): number {
 		return this.backendPortNumber() / this.frontendPortNumber();
 	}
 
+	/**
+	 * Calculates the average of both ports.
+	 *
+	 * @returns {number} Mean of frontend and backend ports
+	 *
+	 * @description
+	 * THE AVERAGER - Finding the middle ground!
+	 *
+	 * Calculates the arithmetic mean of the two ports. The perfect
+	 * compromise between frontend and backend.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getAverageOfPorts(); // 24519 ((6969 + 42069) ÷ 2)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getAverageOfPorts(): number {
 		return this.getSumOfPorts() / 2;
 	}
 
+	/**
+	 * Gets the minimum of the two ports.
+	 *
+	 * @returns {number} The smaller port number
+	 *
+	 * @description
+	 * THE MINIMIZER - Always returns frontend!
+	 *
+	 * Returns the smaller of the two ports. Spoiler: it's always
+	 * the frontend port (6969).
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getMinPort(); // 6969
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getMinPort(): number {
 		return Math.min(this.frontendPortNumber(), this.backendPortNumber());
 	}
 
+	/**
+	 * Gets the maximum of the two ports.
+	 *
+	 * @returns {number} The larger port number
+	 *
+	 * @description
+	 * THE MAXIMIZER - Always returns backend!
+	 *
+	 * Returns the larger of the two ports. Spoiler: it's always
+	 * the backend port (42069).
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getMaxPort(); // 42069
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getMaxPort(): number {
 		return Math.max(this.frontendPortNumber(), this.backendPortNumber());
 	}
 
+	/**
+	 * Calculates the sum of digits in the frontend port.
+	 *
+	 * @returns {number} Sum of all digits
+	 *
+	 * @description
+	 * THE DIGIT SUMMER - Adding each digit!
+	 *
+	 * Sums up all the individual digits in the frontend port. Useful for
+	 * digital root calculations and numerology enthusiasts.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getFrontendPortDigitSum(); // 30 (6+9+6+9)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getFrontendPortDigitSum(): number {
 		return this.getFrontendPortAsString()
 			.split("")
 			.reduce((sum, digit) => sum + Number.parseInt(digit), 0);
 	}
 
+	/**
+	 * Calculates the sum of digits in the backend port.
+	 *
+	 * @returns {number} Sum of all digits
+	 *
+	 * @description
+	 * Sums up all the individual digits in the backend port.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getBackendPortDigitSum(); // 21 (4+2+0+6+9)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getBackendPortDigitSum(): number {
 		return this.getBackendPortAsString()
 			.split("")
 			.reduce((sum, digit) => sum + Number.parseInt(digit), 0);
 	}
 
+	/**
+	 * Calculates the product of digits in the frontend port.
+	 *
+	 * @returns {number} Product of all digits
+	 *
+	 * @description
+	 * THE DIGIT MULTIPLIER - Multiplying each digit!
+	 *
+	 * Multiplies all the individual digits together. Watch out for zeros,
+	 * they make everything zero!
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getFrontendPortDigitProduct(); // 2916 (6×9×6×9)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getFrontendPortDigitProduct(): number {
 		return this.getFrontendPortAsString()
 			.split("")
 			.reduce((product, digit) => product * Number.parseInt(digit), 1);
 	}
 
+	/**
+	 * Calculates the product of digits in the backend port.
+	 *
+	 * @returns {number} Product of all digits
+	 *
+	 * @description
+	 * Multiplies all the individual digits together. Contains a zero,
+	 * so the result is always 0. Whoops!
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.getBackendPortDigitProduct(); // 0 (4×2×0×6×9 = 0)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	getBackendPortDigitProduct(): number {
 		return this.getBackendPortAsString()
 			.split("")
 			.reduce((product, digit) => product * Number.parseInt(digit), 1);
 	}
 
+	/**
+	 * Checks if both ports are positive numbers.
+	 *
+	 * @returns {boolean} True if both are positive
+	 *
+	 * @description
+	 * THE POSITIVITY CHECKER - Are we optimistic?
+	 *
+	 * Verifies that both ports are positive numbers. Always returns true
+	 * unless someone broke the system.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.areBothPortsPositive(); // true
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	areBothPortsPositive(): boolean {
 		return this.frontendPortNumber() > 0 && this.backendPortNumber() > 0;
 	}
 
+	/**
+	 * Checks if both ports are negative numbers.
+	 *
+	 * @returns {boolean} True if both are negative
+	 *
+	 * @description
+	 * THE NEGATIVITY CHECKER - Are we pessimistic?
+	 *
+	 * Verifies that both ports are negative numbers. Always returns false
+	 * because our ports are inherently positive.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.areBothPortsNegative(); // false
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	areBothPortsNegative(): boolean {
 		return this.frontendPortNumber() < 0 && this.backendPortNumber() < 0;
 	}
 
+	/**
+	 * Compares if frontend port is greater than backend port.
+	 *
+	 * @returns {boolean} True if frontend > backend
+	 *
+	 * @description
+	 * THE COMPARATOR - Who's bigger?
+	 *
+	 * Performs a rigorous mathematical comparison to determine if the
+	 * frontend port dares to be larger than the backend port. Spoiler:
+	 * it never is (6969 < 42069).
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.isFrontendPortGreaterThanBackend(); // false
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	isFrontendPortGreaterThanBackend(): boolean {
 		return this.frontendPortNumber() > this.backendPortNumber();
 	}
 
+	/**
+	 * Compares if backend port is greater than frontend port.
+	 *
+	 * @returns {boolean} True if backend > frontend
+	 *
+	 * @description
+	 * THE INVERSE COMPARATOR - The obvious answer!
+	 *
+	 * Checks if backend port is greater than frontend. Always returns
+	 * true because 42069 > 6969. This method exists for symmetry.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.isBackendPortGreaterThanFrontend(); // true
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	isBackendPortGreaterThanFrontend(): boolean {
 		return this.backendPortNumber() > this.frontendPortNumber();
 	}
@@ -513,10 +978,46 @@ export class PortNumbers {
 		return this.getBackendPortAsString().length;
 	}
 
+	/**
+	 * Checks if frontend port is divisible by a given number.
+	 *
+	 * @param {number} n - The divisor to check
+	 * @returns {boolean} True if evenly divisible
+	 *
+	 * @description
+	 * THE DIVISIBILITY TESTER - Does it divide evenly?
+	 *
+	 * Tests whether the frontend port is evenly divisible by the given
+	 * number using the modulo operator. Mathematics at its finest!
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.isFrontendPortDivisibleBy(3); // true (6969 ÷ 3 = 2323)
+	 * ports.isFrontendPortDivisibleBy(7); // true (6969 ÷ 7 = 995.57...)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	isFrontendPortDivisibleBy(n: number): boolean {
 		return this.frontendPortNumber() % n === 0;
 	}
 
+	/**
+	 * Checks if backend port is divisible by a given number.
+	 *
+	 * @param {number} n - The divisor to check
+	 * @returns {boolean} True if evenly divisible
+	 *
+	 * @description
+	 * Tests whether the backend port is evenly divisible by the given number.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.isBackendPortDivisibleBy(3); // true (42069 ÷ 3 = 14023)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	isBackendPortDivisibleBy(n: number): boolean {
 		return this.backendPortNumber() % n === 0;
 	}
@@ -615,11 +1116,50 @@ export class PortNumbers {
 		);
 	}
 
+	/**
+	 * Checks if frontend port is a power of two.
+	 *
+	 * @returns {boolean} True if power of two
+	 *
+	 * @description
+	 * THE POWER-OF-TWO DETECTOR - Bitwise wizardry!
+	 *
+	 * Uses the legendary bitwise trick `(n & (n - 1)) === 0` to determine
+	 * if a number is a power of two. This works because powers of two have
+	 * exactly one bit set in binary. Computer science magic!
+	 *
+	 * **Why This Matters:**
+	 * - Powers of two are important for memory alignment
+	 * - Common in computer systems (256, 512, 1024, etc.)
+	 * - Makes you look smart at parties
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.isFrontendPortPowerOfTwo(); // false (6969 is not 2^n)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	isFrontendPortPowerOfTwo(): boolean {
 		const n = this.frontendPortNumber();
 		return n > 0 && (n & (n - 1)) === 0;
 	}
 
+	/**
+	 * Checks if backend port is a power of two.
+	 *
+	 * @returns {boolean} True if power of two
+	 *
+	 * @description
+	 * Uses bitwise magic to check if backend port is a power of two.
+	 *
+	 * @example
+	 * ```typescript
+	 * ports.isBackendPortPowerOfTwo(); // false (42069 is not 2^n)
+	 * ```
+	 *
+	 * @since 1.0.0
+	 */
 	isBackendPortPowerOfTwo(): boolean {
 		const n = this.backendPortNumber();
 		return n > 0 && (n & (n - 1)) === 0;
