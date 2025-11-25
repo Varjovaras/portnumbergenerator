@@ -38,8 +38,8 @@
     }
   },
   "scripts": {
-    "test": "tsx test-all.ts",
-    "test:watch": "tsx watch test-all.ts",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
     "typecheck": "tsc --noEmit --skipLibCheck",
     "build": "tsc --skipLibCheck",
     "build:clean": "rm -rf dist && npm run build",
